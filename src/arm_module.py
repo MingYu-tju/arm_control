@@ -24,7 +24,7 @@ class Arm():
 #        self.horn = voice(self.serial2)
 #        self.arm = firstArm(self.servo, self.pwmservo, self.suck, self.horn)
 
-        self.serial = uart("/dev/ttyUSB1")
+        self.serial = uart("/dev/ttyUSB0")
         self.serial1 = uart("/dev/ttyAMA2", 9600)
         self.horn = voice(self.serial1)
         self.arm = firstArm(self.serial, self.horn)

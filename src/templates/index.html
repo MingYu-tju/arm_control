@@ -480,20 +480,22 @@
                     document.getElementById('pumpStatus').textContent = data.pump_status || 'OFF';
                     document.getElementById('pumpAngleDisplay').textContent = (data.pump_angle !== undefined ? data.pump_angle : '0') + '°';
 
-                    // 动态更新物体识别列表 (原型)
+                    // --- 新增：动态更新物体识别列表 ---
                     const objectsListEl = document.getElementById('recognizedObjectsList');
-                    // objectsListEl.innerHTML = ''; // 清空，如果需要完全动态
-                    // if (data.recognized_objects && data.recognized_objects.length > 0) {
-                    //     data.recognized_objects.forEach(obj => {
-                    //         const li = document.createElement('li');
-                    //         li.innerHTML = `${obj.name} (${obj.color || 'N/A'}) - Pos: [${obj.x},${obj.y},${obj.z}] <button onclick="pickObject('${obj.id}')">拾取</button>`;
-                    //         objectsListEl.appendChild(li);
-                    //     });
-                    // } else {
-                    //     // objectsListEl.innerHTML = '<li>未识别到物体</li>'; // 如果列表为空
-                    // }
-                    document.getElementById('targetObjectInfo').textContent = data.target_object || '未指定';
-                    document.getElementById('targetLocationInfo').textContent = data.target_location || '未指定';
+                    objectsListEl.innerHTML = ''; // 清空现有列表项
+                    if (data.detected_objects && data.detected_objects.length > 0) {
+                        data.detected_objects.forEach(obj => {
+                            const li = document.createElement('li');
+                            // 注意：obj.box_center_x 和 obj.box_center_y 是像素坐标
+                            li.innerHTML = `${obj.name} (置信度: ${obj.confidence * 100}%) - 中心: [${obj.box_center_x},${obj.box_center_y}] 
+                                          <button onclick="requestPickObject('${obj.id}', ${obj.box_center_x}, ${obj.box_center_y}, '${obj.name}')">拾取</button>`;
+                            objectsListEl.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = '当前未检测到可识别物体。';
+                        objectsListEl.appendChild(li);
+                    }
                 })
                 .catch((error) => {
                     addToLog('获取状态错误: ' + error.message);
@@ -501,7 +503,17 @@
                     console.error('Error fetching status:', error);
                 });
         }
-
+        function requestPickObject(objectId, pixelX, pixelY, objectName) {
+            addToLog(`请求拾取物体: ${objectName} (ID: ${objectId}) at pixel (${pixelX}, ${pixelY})`);
+            // 发送包含像素坐标的拾取指令
+            sendCommandToBackend('pick_object', {
+                id: objectId,
+                pixel_x: pixelX,
+                pixel_y: pixelY,
+                name: objectName
+            });
+            updateSystemMessage(`拾取指令已发送: ${objectName}`, 'info');
+        }
         function updateLedIndicators(statusText) {
             const leds = {
                 red: document.getElementById('ledRed'),
@@ -551,11 +563,11 @@
             document.getElementById('recognizedText').textContent = "正在录音/识别...";
         }
 
-        function pickObject(objectId) { // objectId 应该是唯一的标识
-            addToLog('请求拾取物体: ' + objectId);
-            sendCommandToBackend('pick_object_by_id', { id: objectId });
-            updateSystemMessage('拾取指令已发送: ' + objectId, 'info');
-        }
+        // function pickObject(objectId) { // objectId 应该是唯一的标识
+        //     addToLog('请求拾取物体: ' + objectId);
+        //     sendCommandToBackend('pick_object_by_id', { id: objectId });
+        //     updateSystemMessage('拾取指令已发送: ' + objectId, 'info');
+        // }
 
         function setPumpAngle() {
             const angleInput = document.getElementById('pumpAngleInput');
@@ -580,7 +592,7 @@
             logAreaDiv.parentNode.replaceChild(logAreaTextarea, logAreaDiv);
 
             updateFullStatus();
-            setInterval(updateFullStatus, 3000);
+            setInterval(updateFullStatus, 2000);
             addToLog("Web UI 已加载，开始与后端通信...");
             updateSystemMessage("就绪，等待操作或语音指令。");
         });
