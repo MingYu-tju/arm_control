@@ -1,0 +1,281 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.header {
+    background-color: #007bff;
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.8em;
+}
+
+.main-container {
+    display: flex;
+    flex-grow: 1;
+    padding: 15px;
+    gap: 15px;
+    flex-wrap: wrap;
+    /* 允许在高缩放或小屏幕时换行 */
+}
+
+.control-panel {
+    flex: 2 1 500px;
+    /* flex-grow, flex-shrink, flex-basis */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 320px;
+}
+
+.status-panel {
+    flex: 1 1 300px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    min-width: 280px;
+}
+
+.control-section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.control-section h2 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #0056b3;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.input-group label {
+    white-space: nowrap;
+    margin-right: 5px;
+}
+
+button,
+input[type="text"],
+input[type="number"],
+select {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    font-size: 0.95em;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+input[type="number"] {
+    width: 80px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    min-width: 100px;
+}
+
+button:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0px);
+    box-shadow: none;
+}
+
+button.red {
+    background-color: #dc3545;
+}
+
+button.red:hover {
+    background-color: #c82333;
+}
+
+button.yellow {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+button.yellow:hover {
+    background-color: #e0a800;
+}
+
+button.green {
+    background-color: #28a745;
+}
+
+button.green:hover {
+    background-color: #218838;
+}
+
+button.gray {
+    background-color: #6c757d;
+}
+
+button.gray:hover {
+    background-color: #5a6268;
+}
+
+.status-area,
+.info-box {
+    margin-bottom: 8px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    font-size: 0.9em;
+    word-break: break-all;
+}
+
+.info-box strong {
+    color: #0056b3;
+}
+
+#logArea {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #222;
+    color: #eee;
+    border-radius: 4px;
+    height: 180px;
+    overflow-y: scroll;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.85em;
+    white-space: pre-wrap;
+    border: none;
+}
+
+.camera-feed-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.camera-feed {
+    display: inline-block;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #ddd;
+    background-color: #000;
+    border-radius: 4px;
+}
+
+.voice-input-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.voice-input-section input[type="text"] {
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+.recognized-objects-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.recognized-objects-list li {
+    background-color: #eef;
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 3px;
+    font-size: 0.85em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recognized-objects-list li button {
+    font-size: 0.8em;
+    padding: 3px 6px;
+    min-width: auto;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.8em;
+    color: #777;
+    margin-top: auto;
+}
+
+.led-indicator-container {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+    padding: 5px 0;
+}
+
+.led {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #555;
+    display: inline-block;
+    margin: 0 5px;
+    border: 1px solid #333;
+    transition: background-color 0.3s;
+}
+
+.led.red.on {
+    background-color: red;
+    box-shadow: 0 0 10px red;
+}
+
+.led.green.on {
+    background-color: limegreen;
+    box-shadow: 0 0 10px limegreen;
+}
+
+.led.yellow.on {
+    background-color: yellow;
+    box-shadow: 0 0 10px yellow;
+}
+
+.led-label {
+    font-size: 0.7em;
+    text-align: center;
+}

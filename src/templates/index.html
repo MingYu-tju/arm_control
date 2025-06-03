@@ -5,289 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>对话取物机器人 - Web 控制界面</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: #f0f2f5;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .header {
-            background-color: #007bff;
-            color: white;
-            padding: 15px 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 1.8em;
-        }
-
-        .main-container {
-            display: flex;
-            flex-grow: 1;
-            padding: 15px;
-            gap: 15px;
-            flex-wrap: wrap;
-            /* 允许在高缩放或小屏幕时换行 */
-        }
-
-        .control-panel {
-            flex: 2 1 500px;
-            /* flex-grow, flex-shrink, flex-basis */
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-width: 320px;
-        }
-
-        .status-panel {
-            flex: 1 1 300px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
-            min-width: 280px;
-        }
-
-        .control-section {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .control-section h2 {
-            margin-top: 0;
-            font-size: 1.2em;
-            color: #0056b3;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-        }
-
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .input-group label {
-            white-space: nowrap;
-            margin-right: 5px;
-        }
-
-        button,
-        input[type="text"],
-        input[type="number"],
-        select {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            font-size: 0.95em;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        input[type="number"] {
-            width: 80px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            min-width: 100px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        button:active {
-            transform: translateY(0px);
-            box-shadow: none;
-        }
-
-        button.red {
-            background-color: #dc3545;
-        }
-
-        button.red:hover {
-            background-color: #c82333;
-        }
-
-        button.yellow {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        button.yellow:hover {
-            background-color: #e0a800;
-        }
-
-        button.green {
-            background-color: #28a745;
-        }
-
-        button.green:hover {
-            background-color: #218838;
-        }
-
-        button.gray {
-            background-color: #6c757d;
-        }
-
-        button.gray:hover {
-            background-color: #5a6268;
-        }
-
-        .status-area,
-        .info-box {
-            margin-bottom: 8px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            font-size: 0.9em;
-            word-break: break-all;
-        }
-
-        .info-box strong {
-            color: #0056b3;
-        }
-
-        #logArea {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #222;
-            color: #eee;
-            border-radius: 4px;
-            height: 180px;
-            overflow-y: scroll;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.85em;
-            white-space: pre-wrap;
-            border: none;
-        }
-
-        .camera-feed-container {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .camera-feed {
-            display: inline-block;
-            max-width: 100%;
-            height: auto;
-            border: 2px solid #ddd;
-            background-color: #000;
-            border-radius: 4px;
-        }
-
-        .voice-input-section {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .voice-input-section input[type="text"] {
-            flex-grow: 1;
-            min-width: 150px;
-        }
-
-        .recognized-objects-list {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .recognized-objects-list li {
-            background-color: #eef;
-            padding: 5px;
-            border-radius: 3px;
-            margin-bottom: 3px;
-            font-size: 0.85em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .recognized-objects-list li button {
-            font-size: 0.8em;
-            padding: 3px 6px;
-            min-width: auto;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 10px;
-            font-size: 0.8em;
-            color: #777;
-            margin-top: auto;
-        }
-
-        .led-indicator-container {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 10px;
-            padding: 5px 0;
-        }
-
-        .led {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #555;
-            display: inline-block;
-            margin: 0 5px;
-            border: 1px solid #333;
-            transition: background-color 0.3s;
-        }
-
-        .led.red.on {
-            background-color: red;
-            box-shadow: 0 0 10px red;
-        }
-
-        .led.green.on {
-            background-color: limegreen;
-            box-shadow: 0 0 10px limegreen;
-        }
-
-        .led.yellow.on {
-            background-color: yellow;
-            box-shadow: 0 0 10px yellow;
-        }
-
-        .led-label {
-            font-size: 0.7em;
-            text-align: center;
-        }
-    </style>
+    <!-- 修改这里的 href 路径 -->
+    <link rel="stylesheet" href="../static/css/style.css">
 </head>
 
 <body>
@@ -299,10 +18,19 @@
         <div class="control-panel">
             <div class="control-section camera-feed-container">
                 <h2>摄像头实时画面</h2>
+                <!-- 
+                    注意: src="{{ url_for('video_feed') }}" 仍然是 Flask 特有的。
+                    如果不是用 Flask，这个视频流源也需要是直接的 URL 或者通过其他方式处理。
+                    例如: <img id="cameraFeed" src="http://your_camera_stream_url" ... >
+                    或者，如果视频流由JS动态设置，初始可以为空或占位图。
+                    为了本次修正聚焦在CSS/JS链接，暂时保留此处的 Flask 语法，
+                    但请注意如果非 Flask 环境，视频流也需要相应调整。
+                -->
                 <img id="cameraFeed" src="{{ url_for('video_feed') }}" class="camera-feed" alt="Camera Feed Loading..."
-                    onerror="this.alt='Camera feed failed to load or not available.'; this.src='';">
+                    onerror="this.alt='Camera feed failed to load or not available.'; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
             </div>
 
+            <!-- ... (页面的其余 HTML 结构保持不变) ... -->
             <div class="control-section">
                 <h2>语音交互 (模拟)</h2>
                 <div class="voice-input-section">
@@ -390,10 +118,8 @@
             <div class="control-section">
                 <h3>物体识别结果 (示例)</h3>
                 <ul id="recognizedObjectsList" class="recognized-objects-list">
-                    <li>苹果 (红色) - 坐标: [x,y,z] <button onclick="pickObject('apple_red_id_123')">拾取</button></li>
-                    <li>杯子 (蓝色) - 坐标: [x,y,z] <button onclick="pickObject('cup_blue_id_456')">拾取</button></li>
-                    <li>书本 - 坐标: [x,y,z] <button onclick="pickObject('book_id_789')">拾取</button></li>
-                    <!-- 更多物体将由JS动态添加 -->
+                    <!-- 动态内容将由JS填充 -->
+                    <li>示例: 苹果 (红色) <button>拾取</button></li>
                 </ul>
                 <div class="info-box"><strong>任务目标物体:</strong> <span id="targetObjectInfo">未指定</span></div>
                 <div class="info-box"><strong>任务目标位置:</strong> <span id="targetLocationInfo">未指定</span></div>
@@ -402,7 +128,6 @@
             <div class="control-section">
                 <h3>机械臂详细状态</h3>
                 <div class="info-box"><strong>末端坐标:</strong> <span id="armCoords">[X, Y, Z, A, B, C]</span></div>
-                <!-- <div class="info-box"><strong>关节角度:</strong> <span id="armJoints">[J1, J2, J3, J4, J5, J6]</span></div> -->
                 <div class="info-box"><strong>吸泵状态:</strong> <span id="pumpStatus">OFF</span></div>
                 <div class="info-box"><strong>旋转头角度:</strong> <span id="pumpAngleDisplay">0°</span></div>
             </div>
@@ -419,184 +144,8 @@
         <p>© 2024-2025 对话取物机器人项目</p>
     </footer>
 
-    <script>
-        function sendCommandToBackend(command, payload = {}) {
-            addToLog('发送指令到后端: ' + command + (Object.keys(payload).length ? ' Payload: ' + JSON.stringify(payload) : ''));
-            fetch('/control', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ command: command, payload: payload }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        // 对于非2xx的响应，也尝试读取json错误信息
-                        return response.json().then(errData => {
-                            throw new Error(errData.message || `HTTP error ${response.status}`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    addToLog('后端响应: ' + JSON.stringify(data));
-                    if (data.message) {
-                        updateSystemMessage(data.message, data.status === 'error' ? 'error' : 'info');
-                    }
-                    updateFullStatus();
-                })
-                .catch((error) => {
-                    const errorMessage = error.message || '与后端通信发生未知错误。';
-                    addToLog('指令错误: ' + errorMessage);
-                    updateSystemMessage('与后端通信失败: ' + errorMessage, 'error');
-                    console.error('Error during command fetch:', error);
-                });
-        }
-
-        function updateFullStatus() {
-            fetch('/status')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('armMainState').textContent = data.arm_state || '未知';
-
-                    const lightStatusText = data.stm32_light_status || '未知';
-                    document.getElementById('stm32LightStatusText').textContent = lightStatusText;
-                    updateLedIndicators(lightStatusText);
-
-                    const trajIndex = data.current_trajectory_index !== undefined ? data.current_trajectory_index : -1;
-                    const totalPoints = data.total_trajectory_points || 0;
-                    if (data.arm_state === 'RUNNING_TRAJECTORY' || data.arm_state === 'PAUSED_TRAJECTORY') {
-                        document.getElementById('trajectoryInfo').textContent = `${trajIndex + 1} / ${totalPoints}`;
-                    } else {
-                        document.getElementById('trajectoryInfo').textContent = 'N/A';
-                    }
-
-                    document.getElementById('armCoords').textContent = data.arm_coords || '[X, Y, Z, A, B, C]';
-                    // document.getElementById('armJoints').textContent = data.arm_joints || '[J1, J2, J3, J4, J5, J6]';
-
-                    document.getElementById('pumpStatus').textContent = data.pump_status || 'OFF';
-                    document.getElementById('pumpAngleDisplay').textContent = (data.pump_angle !== undefined ? data.pump_angle : '0') + '°';
-
-                    // --- 新增：动态更新物体识别列表 ---
-                    const objectsListEl = document.getElementById('recognizedObjectsList');
-                    objectsListEl.innerHTML = ''; // 清空现有列表项
-                    if (data.detected_objects && data.detected_objects.length > 0) {
-                        data.detected_objects.forEach(obj => {
-                            const li = document.createElement('li');
-                            // 注意：obj.box_center_x 和 obj.box_center_y 是像素坐标
-                            li.innerHTML = `${obj.name} (置信度: ${obj.confidence * 100}%) - 中心: [${obj.box_center_x},${obj.box_center_y}] 
-                                          <button onclick="requestPickObject('${obj.id}', ${obj.box_center_x}, ${obj.box_center_y}, '${obj.name}')">拾取</button>`;
-                            objectsListEl.appendChild(li);
-                        });
-                    } else {
-                        const li = document.createElement('li');
-                        li.textContent = '当前未检测到可识别物体。';
-                        objectsListEl.appendChild(li);
-                    }
-                })
-                .catch((error) => {
-                    addToLog('获取状态错误: ' + error.message);
-                    updateSystemMessage('获取系统状态失败: ' + error.message, 'error');
-                    console.error('Error fetching status:', error);
-                });
-        }
-        function requestPickObject(objectId, pixelX, pixelY, objectName) {
-            addToLog(`请求拾取物体: ${objectName} (ID: ${objectId}) at pixel (${pixelX}, ${pixelY})`);
-            // 发送包含像素坐标的拾取指令
-            sendCommandToBackend('pick_object', {
-                id: objectId,
-                pixel_x: pixelX,
-                pixel_y: pixelY,
-                name: objectName
-            });
-            updateSystemMessage(`拾取指令已发送: ${objectName}`, 'info');
-        }
-        function updateLedIndicators(statusText) {
-            const leds = {
-                red: document.getElementById('ledRed'),
-                green: document.getElementById('ledGreen'),
-                yellow: document.getElementById('ledYellow')
-            };
-            for (let color in leds) {
-                leds[color].classList.remove('on');
-            }
-            if (statusText === "RED_ON") leds.red.classList.add('on');
-            else if (statusText === "GREEN_ON") leds.green.classList.add('on');
-            else if (statusText === "YELLOW_ON") leds.yellow.classList.add('on');
-        }
-
-        function addToLog(message) {
-            const logArea = document.getElementById('logArea');
-            const timestamp = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            logArea.value += `[${timestamp}] ${message}\n`; // Use .value for textarea, or .innerHTML for div
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-
-        function updateSystemMessage(message, type = 'info') {
-            const msgArea = document.getElementById('systemMessages');
-            msgArea.textContent = message;
-            const colors = {
-                info: { bg: '#e2f3ff', text: '#0c5460' },
-                error: { bg: '#f8d7da', text: '#721c24' },
-                success: { bg: '#d4edda', text: '#155724' }
-            };
-            msgArea.style.backgroundColor = colors[type].bg;
-            msgArea.style.color = colors[type].text;
-        }
-
-        function sendVoiceCommand() {
-            const commandText = document.getElementById('voiceCommandInput').value;
-            if (!commandText.trim()) { updateSystemMessage('请输入模拟语音指令。', 'error'); return; }
-            addToLog('模拟语音指令: ' + commandText);
-            sendCommandToBackend('process_voice_text', { text: commandText });
-            document.getElementById('recognizedText').textContent = commandText + " (等待后端解析...)";
-            updateSystemMessage('模拟语音指令已发送处理...', 'info');
-        }
-
-        function triggerRecordAudio() {
-            addToLog('请求硬件录音...');
-            sendCommandToBackend('start_hardware_voice_recognition');
-            updateSystemMessage('硬件录音请求已发送...', 'info');
-            document.getElementById('recognizedText').textContent = "正在录音/识别...";
-        }
-
-        // function pickObject(objectId) { // objectId 应该是唯一的标识
-        //     addToLog('请求拾取物体: ' + objectId);
-        //     sendCommandToBackend('pick_object_by_id', { id: objectId });
-        //     updateSystemMessage('拾取指令已发送: ' + objectId, 'info');
-        // }
-
-        function setPumpAngle() {
-            const angleInput = document.getElementById('pumpAngleInput');
-            const angle = parseInt(angleInput.value);
-            if (isNaN(angle) || angle < 0 || angle > 180) {
-                updateSystemMessage('请输入有效的旋转角度 (0 到 180)。', 'error');
-                angleInput.focus();
-                return;
-            }
-            addToLog('设定旋转头角度: ' + angle + '°');
-            sendCommandToBackend('pump_angle_set', { angle: angle });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // 将日志区域改为 textarea 以支持 .value 和滚动
-            const logAreaDiv = document.getElementById('logArea');
-            const logAreaTextarea = document.createElement('textarea');
-            logAreaTextarea.id = 'logArea';
-            logAreaTextarea.readOnly = true;
-            logAreaTextarea.style.cssText = logAreaDiv.style.cssText; // 复制样式
-            logAreaTextarea.style.whiteSpace = 'pre-wrap'; // 确保textarea也换行
-            logAreaDiv.parentNode.replaceChild(logAreaTextarea, logAreaDiv);
-
-            updateFullStatus();
-            setInterval(updateFullStatus, 2000);
-            addToLog("Web UI 已加载，开始与后端通信...");
-            updateSystemMessage("就绪，等待操作或语音指令。");
-        });
-    </script>
+    <!-- 修改这里的 src 路径 -->
+    <script src="../static/js/script.js"></script>
 </body>
 
 </html>

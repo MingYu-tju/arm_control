@@ -243,7 +243,7 @@ def object_detection_task():
         time.sleep(0.1)
     print("[Object Detection Task WebUI] Stopped.")
 
-# --- 机械臂后台任务 (保持不变) ---
+# 机械臂后台任务
 def arm_background_task():
     global current_arm_state, current_trajectory_index, was_running_when_homing_triggered
     print("[Arm BG Task WebUI] Started.")
