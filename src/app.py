@@ -5,9 +5,11 @@ import threading
 import cv2
 import os
 import json
-
+import numpy as np # 新增：用于Pillow和OpenCV图像转换
+from PIL import Image, ImageDraw, ImageFont # 新增：用于绘制中文字体
 from arm_module import Arm
 from TPU import TPUFactory # 确保 TPU.py 和 TPUFactory 类存在且可用
+
 
 # --- 全局配置 ---
 STM32_SERIAL_PORT = "/dev/ttyUSB0" # 根据实际情况修改
@@ -33,6 +35,11 @@ ARM_STATE_HOMING = "HOMING"
 ARM_STATE_MANUAL_MOVE = "MANUAL_MOVE"
 ARM_STATE_PICKING = "PICKING"
 ARM_STATE_VOICE_CONTROL_PICKING = "VOICE_CONTROL_PICKING" # 新增状态
+# --- 中文字体配置 ---
+CHINESE_FONT_PATH = "wqy-zenhei.ttc" # 默认尝试文泉驿正黑，请根据实际情况修改
+# CHINESE_FONT_PATH = "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc" # 另一个例子
+CHINESE_FONT_SIZE = 16 # 可以根据需要调整字体大小
+pil_font = None # 用于存储加载的Pillow字体对象
 
 # --- 物体检测相关配置 ---
 MODEL_CONFIG_DATA = {
@@ -282,27 +289,72 @@ def arm_background_task():
     print("[Arm BG Task WebUI] Stopped.")
 
 # --- 摄像头帧生成器 (保持不变) ---
+# --- 摄像头帧生成器 (修改以支持中文和边框) ---
 def generate_frames():
-    global camera, detected_objects_list
+    global camera, detected_objects_list, pil_font
+    # ... (字体加载逻辑不变) ...
+    if pil_font is None:
+        try:
+            pil_font = ImageFont.truetype(CHINESE_FONT_PATH, CHINESE_FONT_SIZE)
+            print(f"成功加载中文字体: {CHINESE_FONT_PATH}")
+        except IOError:
+            print(f"!!! 错误: 无法加载中文字体 '{CHINESE_FONT_PATH}'. 将使用OpenCV默认字体 (可能出现中文乱码).")
+            pil_font = "FONT_LOAD_FAILED"
+        except Exception as e:
+            print(f"!!! 错误: 加载字体时发生未知错误: {e}")
+            pil_font = "FONT_LOAD_FAILED"
+
     while not stop_threads_flag:
         frame_to_yield, current_boxes_for_overlay = None, []
         with app_lock:
             current_boxes_for_overlay = [(obj['box_center_x'], obj['box_center_y'], obj['box_width'], obj['box_height'], obj['name'], obj['confidence']) for obj in detected_objects_list]
+        
         with camera_lock:
             if camera is None or not camera.isOpened():
+                # ... (摄像头初始化逻辑不变) ...
                 try:
                     camera = cv2.VideoCapture(CAMERA_INDEX)
                     if not camera.isOpened(): time.sleep(0.5); continue
                     camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640); camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-                except Exception as e_cam: print(f"Camera re-init error: {e_cam}"); camera = None; time.sleep(1); continue
+                except Exception as e_cam: print(f"摄像头重新初始化错误: {e_cam}"); camera = None; time.sleep(1); continue
+            
             success, frame = camera.read()
             if success:
-                for (x_center, y_center, w, h, name, score) in current_boxes_for_overlay:
-                    x1, y1, x2, y2 = int(x_center - w / 2), int(y_center - h / 2), int(x_center + w / 2), int(y_center + h / 2)
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.putText(frame, f"{name}: {score:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                # 如果字体加载成功，则使用Pillow绘制中文和边框
+                if pil_font and pil_font != "FONT_LOAD_FAILED":
+                    # 1. OpenCV BGR frame -> PIL RGB Image
+                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    pil_image = Image.fromarray(frame_rgb)
+                    draw = ImageDraw.Draw(pil_image) # 获取Pillow的Draw对象
+
+                    for (x_center, y_center, w, h, name, score) in current_boxes_for_overlay:
+                        x1, y1, x2, y2 = int(x_center - w / 2), int(y_center - h / 2), int(x_center + w / 2), int(y_center + h / 2)
+                        
+                        # 重要修改：使用Pillow的draw对象画框
+                        draw.rectangle([(x1, y1), (x2, y2)], outline=(0, 255, 0), width=2) # 绿色边框，宽度为2
+                        
+                        text_to_display = f"{name}: {score:.2f}"
+                        text_x = x1
+                        text_y = y1 - CHINESE_FONT_SIZE - 2 
+                        if text_y < 0: 
+                            text_y = y1 + 2
+
+                        # 使用Pillow的draw对象写文字
+                        draw.text((text_x, text_y), text_to_display, font=pil_font, fill=(0, 255, 0, 255)) # 绿色文本
+
+                    # 2. PIL RGB Image -> OpenCV BGR frame
+                    # 此时的pil_image已经包含了Pillow画的框和文字
+                    frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR) 
+                
+                else: # 字体加载失败，回退到OpenCV的putText (中文会乱码，但框应该还在)
+                    for (x_center, y_center, w, h, name, score) in current_boxes_for_overlay:
+                        x1, y1, x2, y2 = int(x_center - w / 2), int(y_center - h / 2), int(x_center + w / 2), int(y_center + h / 2)
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2) # OpenCV画框
+                        cv2.putText(frame, f"{name}: {score:.2f}", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2) # OpenCV写字
+                
                 ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
                 if ret: frame_to_yield = buffer.tobytes()
+        
         if frame_to_yield: yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_to_yield + b'\r\n')
         time.sleep(1/25)
 
@@ -541,7 +593,17 @@ def init_hardware_and_camera():
     global my_arm_instance, stm32_serial_conn, stm32_reader_thread_obj, arm_bg_thread_obj
     global camera, current_pump_status, current_pump_angle, tpu_instance, object_detection_thread_obj
     global current_arm_state, current_trajectory_index, was_running_when_homing_triggered
-
+    global pil_font # 声明pil_font为全局
+    if pil_font is None or pil_font == "FONT_LOAD_FAILED": # 避免在init中重复尝试
+        try:
+            pil_font = ImageFont.truetype(CHINESE_FONT_PATH, CHINESE_FONT_SIZE)
+            print(f"初始化时成功加载中文字体: {CHINESE_FONT_PATH}")
+        except IOError:
+            print(f"!!! 初始化警告: 无法加载中文字体 '{CHINESE_FONT_PATH}'. 视频流中的中文可能乱码.")
+            pil_font = "FONT_LOAD_FAILED" # 标记失败
+        except Exception as e:
+            print(f"!!! 初始化警告: 加载字体时发生未知错误: {e}")
+            pil_font = "FONT_LOAD_FAILED"
     print("Initializing Arm for WebUI...")
     try:
         my_arm_instance = Arm()
@@ -592,6 +654,11 @@ def init_hardware_and_camera():
 
 # --- Main execution and cleanup (保持不变) ---
 if __name__ == '__main__':
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:
+        print("错误：Pillow库未安装。请运行 'pip install Pillow' 来安装。")
+        exit(1)
     init_hardware_and_camera()
     print("Starting Flask web server on http://0.0.0.0:5000 ...")
     app.run(host='0.0.0.0', port=5000, debug=False, threaded=True, use_reloader=False)
