@@ -32,14 +32,17 @@
 
             <!-- ... (页面的其余 HTML 结构保持不变) ... -->
             <div class="control-section">
-                <h2>语音交互 (模拟)</h2>
+                <h2>语音交互</h2> <!-- Title changed slightly -->
                 <div class="voice-input-section">
                     <input type="text" id="voiceCommandInput" placeholder="输入模拟语音指令...">
-                    <button onclick="sendVoiceCommand()">发送指令</button>
-                    <button onclick="triggerRecordAudio()">开始录音 (硬件)</button>
+                    <button onclick="sendVoiceCommand()">发送模拟指令</button> <!-- Button text clarified -->
+                    <button onclick="triggerRecordAudio()">开始录音 (客户端)</button> <!-- Button text clarified -->
                 </div>
-                <div class="info-box"><strong>识别文本:</strong> <span id="recognizedText">待识别...</span></div>
-                <div class="info-box"><strong>语音反馈:</strong> <span id="voiceFeedback">系统就绪。</span></div>
+                <div class="info-box"><strong>语音识别文本:</strong> <span id="recognizedText">待识别...</span></div>
+                <div class="info-box"><strong>指令理解状态:</strong> <span id="nluStatus">就绪</span></div>
+                <div class="info-box"><strong>系统回复/NLU结果:</strong> <span id="nluResultText">待理解...</span></div>
+                <!-- The 'voiceFeedback' span was previously here, but its functionality is largely covered by systemMessages now -->
+                <!-- For clarity, I'm relying on systemMessages for general feedback, and recognizedText for the ASR output -->
             </div>
 
             <div class="control-section">
